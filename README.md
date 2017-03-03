@@ -24,7 +24,7 @@ Body
   
 HTTP-response
  - Status Line: http version & response code (200, 500 etc)
- - general-header: witregel
+ - general-header: 
  - response header
   - Content-Length: nnnn
   - Accept-Language: xx-xx
