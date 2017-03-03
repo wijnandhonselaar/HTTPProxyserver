@@ -29,12 +29,16 @@ HTTP-response
    - Metainformation about body contents
 Body
  ...
+ 
  --------------
+ 
  Request-line bevat een URI (Uniform Resouce Identifier), de meest gebruikte standaard voor een URI is de URL (Uniform Resource Locator). Met daarbij een methode specificatie als POST of GET.
  General header bevat de optionele opties, als caching en connectie proprties.
  Request header bestaat uit essentiële data om de request af te handelen. Dit is de grootste collectie van opties die meegegeven worden.
  Entity header gaat over de content van het bericht. Hierin staat informatie als de content-length, en content-type.
+ 
  --------------
+ 
 
 2.b Hoe wordt de content in een bericht verpakt?
   De content van een HTTP bericht begint na een witregel na de entity-header.
