@@ -17,8 +17,11 @@ HTTP-request
  - entity-header
   - Content-Language: xx-xx
   - Content-length: nnnn
+  
 Body
+
   ...
+  
 HTTP-response
  - Status Line: http version & response code (200, 500 etc)
  - general-header: witregel
@@ -27,7 +30,9 @@ HTTP-response
   - Accept-Language: xx-xx
  - entity-header
    - Metainformation about body contents
+   
 Body
+
  ...
  
  --------------
