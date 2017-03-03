@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,7 +15,7 @@ namespace HTTPProxyserver
 {
     public partial class Form1 : Form
     {
-        private HttpListener server = null;
+        private HttpListener _server = null;
 
         public Form1()
         {
@@ -23,14 +24,14 @@ namespace HTTPProxyserver
 
         private void btnToggleProxy_Click(object sender, EventArgs e)
         {
-            if (server == null) Listener();
+            if (_server == null) Listener();
             else Stop();
         }
 
         private void Stop()
         {
-            server.Close();
-            server = null;
+            _server.Stop();
+            _server = null;
         }
 
         private void btnClear_Click(object sender, EventArgs e)
@@ -38,13 +39,14 @@ namespace HTTPProxyserver
             lstLog.Items.Clear();
         }
 
-        private void Listener()
+        private async void Listener()
         {
-            server.Start();
-            while (true)
-            {
-                server.
-            }
+            _server.Start();
+        }
+
+        private void ProcessRequest()
+        {
+
         }
     }
 }
