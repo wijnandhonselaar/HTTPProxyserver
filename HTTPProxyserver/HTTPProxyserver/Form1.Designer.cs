@@ -46,8 +46,8 @@
             this.txtCache = new System.Windows.Forms.TextBox();
             this.txtPort = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.btnToggleProxy = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
+            this.btnToggleProxy = new System.Windows.Forms.Button();
             this.cbLogClient.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -215,6 +215,7 @@
             // 
             this.txtBufferSize.Location = new System.Drawing.Point(193, 166);
             this.txtBufferSize.Name = "txtBufferSize";
+            this.txtBufferSize.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.txtBufferSize.Size = new System.Drawing.Size(187, 20);
             this.txtBufferSize.TabIndex = 20;
             // 
@@ -222,15 +223,19 @@
             // 
             this.txtCache.Location = new System.Drawing.Point(193, 45);
             this.txtCache.Name = "txtCache";
+            this.txtCache.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.txtCache.Size = new System.Drawing.Size(187, 20);
             this.txtCache.TabIndex = 19;
+            this.txtCache.Text = "300";
             // 
             // txtPort
             // 
             this.txtPort.Location = new System.Drawing.Point(193, 19);
             this.txtPort.Name = "txtPort";
+            this.txtPort.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.txtPort.Size = new System.Drawing.Size(187, 20);
             this.txtPort.TabIndex = 18;
+            this.txtPort.Text = "8080";
             // 
             // groupBox2
             // 
@@ -243,16 +248,6 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Controls";
             // 
-            // btnToggleProxy
-            // 
-            this.btnToggleProxy.Location = new System.Drawing.Point(6, 19);
-            this.btnToggleProxy.Name = "btnToggleProxy";
-            this.btnToggleProxy.Size = new System.Drawing.Size(183, 57);
-            this.btnToggleProxy.TabIndex = 17;
-            this.btnToggleProxy.Text = "Start / Stop proxy";
-            this.btnToggleProxy.UseVisualStyleBackColor = true;
-            this.btnToggleProxy.Click += new System.EventHandler(this.btnToggleProxy_Click);
-            // 
             // btnClear
             // 
             this.btnClear.Location = new System.Drawing.Point(195, 19);
@@ -262,6 +257,16 @@
             this.btnClear.Text = "Clear log";
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            // 
+            // btnToggleProxy
+            // 
+            this.btnToggleProxy.Location = new System.Drawing.Point(6, 19);
+            this.btnToggleProxy.Name = "btnToggleProxy";
+            this.btnToggleProxy.Size = new System.Drawing.Size(183, 57);
+            this.btnToggleProxy.TabIndex = 17;
+            this.btnToggleProxy.Text = "Start / Stop proxy";
+            this.btnToggleProxy.UseVisualStyleBackColor = true;
+            this.btnToggleProxy.Click += new System.EventHandler(this.btnToggleProxy_Click);
             // 
             // Form1
             // 
