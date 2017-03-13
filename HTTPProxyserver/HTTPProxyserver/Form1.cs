@@ -148,6 +148,6 @@ namespace HTTPProxyserver
             }
         }
 
-        private delegate void NewMessage(string message);
+//        private delegate void NewMessage(string message);
     }
 }
