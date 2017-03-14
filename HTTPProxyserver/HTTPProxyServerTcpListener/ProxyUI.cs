@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -13,6 +18,7 @@ namespace HTTPProxyServerTcpListener
         private bool _listening;
         private TcpListener _server;
         private delegate void MessageHandler(string message);
+        private ConcurrentDictionary<MD5, CacheItem> _cache = new ConcurrentDictionary<MD5, CacheItem>();
 
         public ProxyUI()
         {
@@ -50,6 +56,7 @@ namespace HTTPProxyServerTcpListener
             var port = int.Parse(txtPort.Text);
             _server = new TcpListener(IPAddress.Any, port);
             _server.Start();
+            PrintMessage("Listener has been started");
             while (_listening)
                 try
                 {
@@ -71,14 +78,18 @@ namespace HTTPProxyServerTcpListener
             // HTTP: The Definitive Guide
             if (client.Connected && stream.DataAvailable)
             {
-                var buffer = new byte[2014];
+                int bufferSize;
+                if(!int.TryParse(txtBufferSize.Text, out bufferSize))
+                    bufferSize = 2048;
+
+                var buffer = new byte[bufferSize];
                 string context = null;
                 var bytes = stream.Read(buffer, 0, buffer.Length);
                 while (bytes > 0)
                 {
                     context += Encoding.ASCII.GetString(buffer);
                     Array.Clear(buffer, 0, buffer.Length);
-                    buffer = new byte[1024];
+                    buffer = new byte[bufferSize];
                     bytes = stream.Read(buffer, 0, buffer.Length);
                 }
                 if (context != null)
@@ -87,19 +98,14 @@ namespace HTTPProxyServerTcpListener
                         var request = new Request(context);
                         PrintMessage(request.Method);
                         PrintMessage(request.Url);
-                        // handmatig een WebRequst aanmaken op TCP niveau
                         var webRequest = WebRequest.Create(request.Url) as HttpWebRequest;
                         if (webRequest == null) return;
+                        AddHeaders(webRequest, request);
                         var response = await webRequest.GetResponseAsync() as HttpWebResponse;
                         if (response == null) return;
-                        var body = "";
-                        var s = response.GetResponseStream();
-                        if (s == null) return;
-                        using (var reader = new StreamReader(s))
-                        {
-                            body = reader.ReadToEnd();
-                        }
-                        SendResponse(webRequest, response, stream, body);
+                        SendResponse(response, stream);
+                        stream.Close();
+                        client.Close();
                     }
                     catch (Exception e)
                     {
@@ -109,24 +115,65 @@ namespace HTTPProxyServerTcpListener
             }
         }
 
-        private void SendResponse(HttpWebRequest webReq, HttpWebResponse httpRes, Stream stream, string body)
+        private void AddHeaders(HttpWebRequest webRequest, Request request)
         {
-            var response = MapToResponse(webReq, httpRes, body);
-            
-            var buffer = Encoding.ASCII.GetBytes(response);
-            stream.Write(buffer, 0, buffer.Length);
+            webRequest.Accept = request.Accept;
+//            webRequest.Connection = request.Con;
+            webRequest.UserAgent = request.UserAgent;
         }
 
-        private string MapToResponse(HttpWebRequest webReq, HttpWebResponse httpRes, string body)
+        private bool AcceptRequest(string contentType)
+        {
+            var invalid = new List<string> { "image", "video", "audio" };
+            return invalid.All(x => !contentType.Contains(x));
+        }
+
+        private void SendResponse(HttpWebResponse httpRes, Stream stream)
+        {
+            if (AcceptRequest(httpRes.ContentType) && httpRes.Method == "GET")
+            {
+                var resStream = httpRes.GetResponseStream();
+                if (resStream == null) return;
+                var reader = new StreamReader(resStream);
+                var responseBody = reader.ReadToEnd();
+                var response = MapToResponse(httpRes, responseBody);
+                var buffer = Encoding.ASCII.GetBytes(response);
+                stream.Write(buffer, 0, buffer.Length);
+            }
+            else
+            {
+                httpRes.GetResponseStream().CopyTo(stream);
+            }
+        }
+
+        private string ToHeaderProperty(string name, string value)
+        {
+            return name + ": " + value + "\r\n";
+        }
+
+        private CacheItem CreateCache(HttpWebRequest req)
+        {
+            var resp = req?.GetResponse() as HttpWebResponse;
+            if (resp == null) return null;
+
+            var body = "";
+            var stream = resp.GetResponseStream();
+            if (stream == null) return null;
+            using (var reader = new StreamReader(stream))
+            {
+                body = reader.ReadToEnd();
+            }
+            return new CacheItem(resp, body);
+        }
+
+        private string MapToResponse(HttpWebResponse httpRes, string body)
         {
             var response = "";
-            if (webReq.Method != WebRequestMethods.Http.Get) return response;
             // status line
-            response += "HTTP/" + webReq.ProtocolVersion + " " + httpRes.StatusCode.GetHashCode() + " " +
+            response += "HTTP/" + httpRes.ProtocolVersion + " " + httpRes.StatusCode.GetHashCode() + " " +
                         httpRes.StatusDescription + "\r\n";
             // Date
-            PrintMessage(webReq.Date.ToLongTimeString());
-            response += "Date: Sun, 18 Oct 2009 10:47:06 GMT";
+            response += ToHeaderProperty("Date", httpRes.Headers["Date"]);
             // Server
             response += ToHeaderProperty("Server", httpRes.Server);
             // Content-Type
@@ -134,18 +181,13 @@ namespace HTTPProxyServerTcpListener
             // Content-Length
             response += ToHeaderProperty("Content-Length", httpRes.ContentLength.ToString());
             // Connection
-            response += ToHeaderProperty("Connection", webReq.Connection);
+            response += ToHeaderProperty("Connection", "keep-alive");
             // Keep-Alive
-            response += ToHeaderProperty("Keep-Alive", webReq.KeepAlive.ToString());
+            response += ToHeaderProperty("Keep-Alive", "");
             // Body
             response += "\r\n";
             response += body;
             return response;
-        }
-
-        private string ToHeaderProperty(string name, string value)
-        {
-            return name + ": " + value + "\r\n";
         }
     }
 }

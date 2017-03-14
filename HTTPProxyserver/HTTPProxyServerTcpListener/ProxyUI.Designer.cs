@@ -216,6 +216,7 @@
             this.txtBufferSize.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.txtBufferSize.Size = new System.Drawing.Size(187, 20);
             this.txtBufferSize.TabIndex = 20;
+            this.txtBufferSize.Text = "2048";
             // 
             // txtCache
             // 
@@ -269,7 +270,7 @@
             this.lstLog.Size = new System.Drawing.Size(402, 472);
             this.lstLog.TabIndex = 20;
             // 
-            // Form1
+            // ProxyUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -277,7 +278,7 @@
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.cbLogClient);
             this.Controls.Add(this.lstLog);
-            this.Name = "Form1";
+            this.Name = "ProxyUI";
             this.Text = "Form1";
             this.groupBox2.ResumeLayout(false);
             this.cbLogClient.ResumeLayout(false);

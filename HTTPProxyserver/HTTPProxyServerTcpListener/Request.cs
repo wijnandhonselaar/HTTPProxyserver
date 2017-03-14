@@ -92,11 +92,6 @@ namespace HTTPProxyServerTcpListener
             return line.Contains(':');
         }
 
-        private string Split(string line, int index = 1, char x = ' ')
-        {
-            return line.Split(x)[index];
-        }
-
         private string GetKey(string line)
         {
             return line.Split(':')[0];
@@ -105,22 +100,6 @@ namespace HTTPProxyServerTcpListener
         private string GetValue(string line)
         {
             return line.Split(':')[1];
-        }
-
-        private CacheItem CreateCache(string url)
-        {
-            var req = WebRequest.Create(url) as HttpWebRequest;
-            var resp = req?.GetResponse() as HttpWebResponse;
-            if (resp == null) return null;
-
-            var body = "";
-            var stream = resp.GetResponseStream();
-            if (stream == null) return null;
-            using (var reader = new StreamReader(stream))
-            {
-                body = reader.ReadToEnd();
-            }
-            return new CacheItem(resp, body);
         }
 
         internal class HeaderProperty
