@@ -34,22 +34,22 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.checkBox9 = new System.Windows.Forms.CheckBox();
+            this.cbLogClient = new System.Windows.Forms.CheckBox();
             this.cbLogContentOut = new System.Windows.Forms.CheckBox();
             this.cbLogContentIn = new System.Windows.Forms.CheckBox();
             this.cbLogRespHeaders = new System.Windows.Forms.CheckBox();
             this.cbLogReqHeaders = new System.Windows.Forms.CheckBox();
             this.cbAccessAuthentication = new System.Windows.Forms.CheckBox();
-            this.checkBox4 = new System.Windows.Forms.CheckBox();
+            this.cbChangeHeaders = new System.Windows.Forms.CheckBox();
             this.cbContentFilter = new System.Windows.Forms.CheckBox();
             this.cbChangedContent = new System.Windows.Forms.CheckBox();
             this.txtBufferSize = new System.Windows.Forms.TextBox();
             this.txtCache = new System.Windows.Forms.TextBox();
             this.txtPort = new System.Windows.Forms.TextBox();
-            this.cbLogClient = new System.Windows.Forms.GroupBox();
+            this.container1 = new System.Windows.Forms.GroupBox();
             this.lstLog = new System.Windows.Forms.ListBox();
             this.groupBox2.SuspendLayout();
-            this.cbLogClient.SuspendLayout();
+            this.container1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnToggleProxy
@@ -81,25 +81,26 @@
             this.btnClear.TabIndex = 18;
             this.btnClear.Text = "Clear log";
             this.btnClear.UseVisualStyleBackColor = true;
+            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
             // label3
             // 
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(96, 169);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(91, 13);
+            this.label3.Size = new System.Drawing.Size(53, 13);
             this.label3.TabIndex = 32;
-            this.label3.Text = "T4, T8) Buffersize";
+            this.label3.Text = "Buffersize";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(33, 48);
+            this.label2.Location = new System.Drawing.Point(64, 48);
             this.label2.Name = "label2";
             this.label2.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.label2.Size = new System.Drawing.Size(159, 13);
+            this.label2.Size = new System.Drawing.Size(123, 13);
             this.label2.TabIndex = 31;
-            this.label2.Text = "P1.a) cache time out in seconds";
+            this.label2.Text = "Cache timout in seconds";
             // 
             // label1
             // 
@@ -110,16 +111,16 @@
             this.label1.TabIndex = 30;
             this.label1.Text = "proxy port";
             // 
-            // checkBox9
+            // cbLogClient
             // 
-            this.checkBox9.AutoSize = true;
-            this.checkBox9.Location = new System.Drawing.Point(288, 284);
-            this.checkBox9.Name = "checkBox9";
-            this.checkBox9.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.checkBox9.Size = new System.Drawing.Size(92, 17);
-            this.checkBox9.TabIndex = 29;
-            this.checkBox9.Text = "Logging client";
-            this.checkBox9.UseVisualStyleBackColor = true;
+            this.cbLogClient.AutoSize = true;
+            this.cbLogClient.Location = new System.Drawing.Point(288, 284);
+            this.cbLogClient.Name = "cbLogClient";
+            this.cbLogClient.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.cbLogClient.Size = new System.Drawing.Size(92, 17);
+            this.cbLogClient.TabIndex = 29;
+            this.cbLogClient.Text = "Logging client";
+            this.cbLogClient.UseVisualStyleBackColor = true;
             // 
             // cbLogContentOut
             // 
@@ -168,45 +169,45 @@
             // cbAccessAuthentication
             // 
             this.cbAccessAuthentication.AutoSize = true;
-            this.cbAccessAuthentication.Location = new System.Drawing.Point(174, 140);
+            this.cbAccessAuthentication.Location = new System.Drawing.Point(164, 140);
             this.cbAccessAuthentication.Name = "cbAccessAuthentication";
             this.cbAccessAuthentication.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.cbAccessAuthentication.Size = new System.Drawing.Size(205, 17);
+            this.cbAccessAuthentication.Size = new System.Drawing.Size(215, 17);
             this.cbAccessAuthentication.TabIndex = 24;
-            this.cbAccessAuthentication.Text = "P4.b) Zet basic access authentication";
+            this.cbAccessAuthentication.Text = "Turn basic access authentication on/off";
             this.cbAccessAuthentication.UseVisualStyleBackColor = true;
             // 
-            // checkBox4
+            // cbChangeHeaders
             // 
-            this.checkBox4.AutoSize = true;
-            this.checkBox4.Location = new System.Drawing.Point(190, 117);
-            this.checkBox4.Name = "checkBox4";
-            this.checkBox4.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.checkBox4.Size = new System.Drawing.Size(190, 17);
-            this.checkBox4.TabIndex = 23;
-            this.checkBox4.Text = "P4.a) Zet het wijzigen van headers";
-            this.checkBox4.UseVisualStyleBackColor = true;
+            this.cbChangeHeaders.AutoSize = true;
+            this.cbChangeHeaders.Location = new System.Drawing.Point(211, 117);
+            this.cbChangeHeaders.Name = "cbChangeHeaders";
+            this.cbChangeHeaders.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.cbChangeHeaders.Size = new System.Drawing.Size(168, 17);
+            this.cbChangeHeaders.TabIndex = 23;
+            this.cbChangeHeaders.Text = "Turn changing headers on/off";
+            this.cbChangeHeaders.UseVisualStyleBackColor = true;
             // 
             // cbContentFilter
             // 
             this.cbContentFilter.AutoSize = true;
-            this.cbContentFilter.Location = new System.Drawing.Point(255, 94);
+            this.cbContentFilter.Location = new System.Drawing.Point(239, 94);
             this.cbContentFilter.Name = "cbContentFilter";
             this.cbContentFilter.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.cbContentFilter.Size = new System.Drawing.Size(125, 17);
+            this.cbContentFilter.Size = new System.Drawing.Size(141, 17);
             this.cbContentFilter.TabIndex = 22;
-            this.cbContentFilter.Text = "P2.) Zet content filter";
+            this.cbContentFilter.Text = "Turn content filter on/off";
             this.cbContentFilter.UseVisualStyleBackColor = true;
             // 
             // cbChangedContent
             // 
             this.cbChangedContent.AutoSize = true;
-            this.cbChangedContent.Location = new System.Drawing.Point(124, 71);
+            this.cbChangedContent.Location = new System.Drawing.Point(223, 71);
             this.cbChangedContent.Name = "cbChangedContent";
             this.cbChangedContent.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.cbChangedContent.Size = new System.Drawing.Size(256, 17);
+            this.cbChangedContent.Size = new System.Drawing.Size(156, 17);
             this.cbChangedContent.TabIndex = 21;
-            this.cbChangedContent.Text = "P1.b) Zet check op gewijzigde content op server";
+            this.cbChangedContent.Text = "Check for changed content";
             this.cbChangedContent.UseVisualStyleBackColor = true;
             // 
             // txtBufferSize
@@ -236,29 +237,29 @@
             this.txtPort.TabIndex = 18;
             this.txtPort.Text = "8080";
             // 
-            // cbLogClient
+            // container1
             // 
-            this.cbLogClient.Controls.Add(this.label3);
-            this.cbLogClient.Controls.Add(this.label2);
-            this.cbLogClient.Controls.Add(this.label1);
-            this.cbLogClient.Controls.Add(this.checkBox9);
-            this.cbLogClient.Controls.Add(this.cbLogContentOut);
-            this.cbLogClient.Controls.Add(this.cbLogContentIn);
-            this.cbLogClient.Controls.Add(this.cbLogRespHeaders);
-            this.cbLogClient.Controls.Add(this.cbLogReqHeaders);
-            this.cbLogClient.Controls.Add(this.cbAccessAuthentication);
-            this.cbLogClient.Controls.Add(this.checkBox4);
-            this.cbLogClient.Controls.Add(this.cbContentFilter);
-            this.cbLogClient.Controls.Add(this.cbChangedContent);
-            this.cbLogClient.Controls.Add(this.txtBufferSize);
-            this.cbLogClient.Controls.Add(this.txtCache);
-            this.cbLogClient.Controls.Add(this.txtPort);
-            this.cbLogClient.Location = new System.Drawing.Point(434, 12);
-            this.cbLogClient.Name = "cbLogClient";
-            this.cbLogClient.Size = new System.Drawing.Size(386, 374);
-            this.cbLogClient.TabIndex = 21;
-            this.cbLogClient.TabStop = false;
-            this.cbLogClient.Text = "Proxy Settings";
+            this.container1.Controls.Add(this.label3);
+            this.container1.Controls.Add(this.label2);
+            this.container1.Controls.Add(this.label1);
+            this.container1.Controls.Add(this.cbLogClient);
+            this.container1.Controls.Add(this.cbLogContentOut);
+            this.container1.Controls.Add(this.cbLogContentIn);
+            this.container1.Controls.Add(this.cbLogRespHeaders);
+            this.container1.Controls.Add(this.cbLogReqHeaders);
+            this.container1.Controls.Add(this.cbAccessAuthentication);
+            this.container1.Controls.Add(this.cbChangeHeaders);
+            this.container1.Controls.Add(this.cbContentFilter);
+            this.container1.Controls.Add(this.cbChangedContent);
+            this.container1.Controls.Add(this.txtBufferSize);
+            this.container1.Controls.Add(this.txtCache);
+            this.container1.Controls.Add(this.txtPort);
+            this.container1.Location = new System.Drawing.Point(434, 12);
+            this.container1.Name = "container1";
+            this.container1.Size = new System.Drawing.Size(386, 374);
+            this.container1.TabIndex = 21;
+            this.container1.TabStop = false;
+            this.container1.Text = "Proxy Settings";
             // 
             // lstLog
             // 
@@ -276,13 +277,13 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(834, 497);
             this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.cbLogClient);
+            this.Controls.Add(this.container1);
             this.Controls.Add(this.lstLog);
             this.Name = "ProxyUI";
             this.Text = "Form1";
             this.groupBox2.ResumeLayout(false);
-            this.cbLogClient.ResumeLayout(false);
-            this.cbLogClient.PerformLayout();
+            this.container1.ResumeLayout(false);
+            this.container1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -295,19 +296,19 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.CheckBox checkBox9;
+        private System.Windows.Forms.CheckBox cbLogClient;
         private System.Windows.Forms.CheckBox cbLogContentOut;
         private System.Windows.Forms.CheckBox cbLogContentIn;
         private System.Windows.Forms.CheckBox cbLogRespHeaders;
         private System.Windows.Forms.CheckBox cbLogReqHeaders;
         private System.Windows.Forms.CheckBox cbAccessAuthentication;
-        private System.Windows.Forms.CheckBox checkBox4;
+        private System.Windows.Forms.CheckBox cbChangeHeaders;
         private System.Windows.Forms.CheckBox cbContentFilter;
         private System.Windows.Forms.CheckBox cbChangedContent;
         private System.Windows.Forms.TextBox txtBufferSize;
         private System.Windows.Forms.TextBox txtCache;
         private System.Windows.Forms.TextBox txtPort;
-        private System.Windows.Forms.GroupBox cbLogClient;
+        private System.Windows.Forms.GroupBox container1;
         private System.Windows.Forms.ListBox lstLog;
     }
 }

@@ -23,7 +23,7 @@ namespace HTTPProxyServerTcpListener
         public string Con { get; set; }
         public string Body { get; set; }
 
-        private List<string> RequestToList(string text)
+        public static List<string> RequestToList(string text)
         {
             string[] seperators = {"\r\n"};
             return text.Split(seperators, StringSplitOptions.None).ToList();
