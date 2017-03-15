@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
@@ -19,7 +20,7 @@ namespace HTTPProxyServerTcpListener
         private bool _listening;
         private TcpListener _server;
         private delegate void MessageHandler(string message);
-        private ConcurrentDictionary<MD5, CacheItem> _cache = new ConcurrentDictionary<MD5, CacheItem>();
+        private ConcurrentDictionary<string, CacheItem> _cache = new ConcurrentDictionary<string, CacheItem>();
 
         public ProxyUI()
         {
@@ -85,39 +86,86 @@ namespace HTTPProxyServerTcpListener
                     bufferSize = 2048;
 
                 var buffer = new byte[bufferSize];
-                string context = null;
-                var bytes = stream.Read(buffer, 0, buffer.Length);
-                while (bytes > 0)
-                {
-                    context += Encoding.ASCII.GetString(buffer);
-                    Array.Clear(buffer, 0, buffer.Length);
-                    buffer = new byte[bufferSize];
-                    if (stream.DataAvailable) bytes = stream.Read(buffer, 0, buffer.Length);
-                    else bytes = -1;
-                }
+                await stream.ReadAsync(buffer, 0, bufferSize);
+                var context = Encoding.ASCII.GetString(buffer);
                 if (context != null)
+                {
                     if (cbLogReqHeaders.Checked) LogHeaders(context);
                     try
                     {
-                        var request = new Request(context);
-                        if (cbContentFilter.Checked && IsImage(request.Url))
-                            request.Url = "http://reactiongifs.me/wp-content/uploads/2013/08/office-dwight-mad.gif";
-                        var webRequest = WebRequest.Create(request.Url) as HttpWebRequest;
+                        var request = ToHead(context);
+                        if (cbContentFilter.Checked && IsImage(request["Url"]))
+                            request["Url"] = "http://reactiongifs.me/wp-content/uploads/2013/08/office-dwight-mad.gif";
+                        var webRequest = WebRequest.Create(request["Url"]) as HttpWebRequest;
                         if (webRequest == null)
                             return;
-                        AddHeaders(webRequest, request);
+//                        AddHeaders(webRequest, request);
                         var response = await webRequest.GetResponseAsync() as HttpWebResponse;
                         if (response == null)
                             return;
-                        SendResponse(webRequest, response, stream);
-                        stream.Close();
-                        client.Close();
+
+                        SendResponse(response, stream);
+                    }
+                    catch (WebException e)
+                    {
+                        SendResponse(e.Response as HttpWebResponse, stream);
+                    }
+                    catch (NotSupportedException e)
+                    {
+                        Console.WriteLine(e.Message);
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e);
+                        Console.WriteLine(e.Message);
                     }
+                    finally
+                    {
+                        stream.Close();
+                        client.Close();
+                    }
+                }
             }
+        }
+
+        private string ToHttpMessage(Dictionary<string, string> http)
+        {
+            var tcpResponse = "";
+            
+            return tcpResponse;
+        }
+
+        private Dictionary<string, string> ToHead(string context)
+        {
+            var request = new Dictionary<string, string>();
+            var lines = Request.RequestToList(context);
+            for (var i = 0; i < lines.Count; i++)
+            {
+                if (i > 0)
+                {
+                    if (lines[i].Contains(':'))
+                    {
+                        request.Add(lines[i].Split(':')[0], lines[i].Split(':')[1].Trim());
+                    }
+                    else if(lines[i] == "\r\n")
+                    {
+                        var body = "";
+                        for (var y = i+1; y < lines.Count; y++)
+                        {
+                            body += lines[y];
+                        }
+                        request.Add("Body", body);
+                        i = lines.Count;
+                    }
+                }
+                else
+                {
+                    var statusLine = lines[i].Split(' ');
+                    request.Add("Method", statusLine[0]);
+                    request.Add("Url", statusLine[1]);
+                    request.Add("HttpVersion", statusLine[2]);
+                }
+            }
+            return request;
         }
 
         private bool IsImage(string url)
@@ -130,11 +178,11 @@ namespace HTTPProxyServerTcpListener
             return false;
         }
 
-        private void AddHeaders(HttpWebRequest webRequest, Request request)
+        private void AddHeaders(HttpWebRequest webRequest, Dictionary<string, string> request)
         {
-            webRequest.Accept = request.Accept;
+            webRequest.Accept = request["Accept"];
 //            webRequest.Connection = request.Con;
-            webRequest.UserAgent = request.UserAgent;
+//            webRequest.UserAgent = request.UserAgent;
         }
 
         private bool AcceptRequest(string contentType)
@@ -143,37 +191,25 @@ namespace HTTPProxyServerTcpListener
             return invalid.All(x => !contentType.Contains(x));
         }
 
-        private void SendResponse(HttpWebRequest webRequest, HttpWebResponse httpRes, Stream stream)
+        private void SendResponse(HttpWebResponse httpRes, Stream stream)
         {
-                var buffer = new byte[2048];
-                if (AcceptRequest(httpRes.ContentType) && httpRes.Method == "GET")
-                {
-                    var resStream = httpRes.GetResponseStream();
-                    if (resStream == null) return;
-                    var reader = new StreamReader(resStream);
-                    var responseBody = reader.ReadToEnd();
-                    var response = MapToResponse(webRequest, httpRes, responseBody);
-                    buffer = Encoding.ASCII.GetBytes(response);
-                    stream.Write(buffer, 0, buffer.Length);
-                }
-                else
-                {
+            if (httpRes.Method == "GET")
+            {
+                var resStream = httpRes.GetResponseStream();
+                if (resStream == null) return;
+                var reader = new StreamReader(resStream);
+                var head = GetHead(httpRes);
+                var responseBody = reader.ReadToEnd();
+                var response = MapToResponse(httpRes, head, responseBody);
+                var buffer = Encoding.ASCII.GetBytes(response);
+                stream.Write(buffer, 0, buffer.Length);
+            }
+            else
+            {
                 httpRes.GetResponseStream().CopyTo(stream);
             }
                 
             
-        }
-
-        /// <summary>
-        /// source: http://stackoverflow.com/questions/3801275/how-to-convert-image-in-byte-array
-        /// </summary>
-        /// <param name="x"></param>
-        /// <returns></returns>
-        public static byte[] converterDemo(Image x)
-        {
-            ImageConverter _imageConverter = new ImageConverter();
-            byte[] xByte = (byte[])_imageConverter.ConvertTo(x, typeof(byte[]));
-            return xByte;
         }
 
         private string ToHeaderProperty(string name, string value)
@@ -181,32 +217,34 @@ namespace HTTPProxyServerTcpListener
             return name + ": " + value + "\r\n";
         }
 
-        private string MapToResponse(HttpWebRequest webRequest, HttpWebResponse httpRes, string body)
+        private string MapToResponse(HttpWebResponse httpRes, string head, string body)
         {
-            var response = "";
-            // status line
-            response += "HTTP/" + httpRes.ProtocolVersion + " " + httpRes.StatusCode.GetHashCode() + " " +
-                        httpRes.StatusDescription + "\r\n";
-            // Date
-            response += ToHeaderProperty("Date", httpRes.Headers["Date"]);
-            // Server
-            response += ToHeaderProperty("Server", httpRes.Server);
-            // Content-Type
-            response += ToHeaderProperty("Content-Type", httpRes.ContentType);
-            // Content-Length
-            response += ToHeaderProperty("Content-Length", httpRes.ContentLength.ToString());
-            // Connection
-            response += ToHeaderProperty("Connection", webRequest.Connection);
-            // Keep-Alive
-            response += ToHeaderProperty("Keep-Alive", webRequest.KeepAlive.ToString());
-
-            if (cbLogRespHeaders.Checked)
-                LogHeaders(response);
+            var response = head;
+            AddToCache(httpRes, head, body);
 
             // Body
             response += "\r\n";
             response += body;
             return response;
+        }
+
+        private string GetHead(HttpWebResponse httpRes)
+        {
+            var head = "";
+            // status line
+            head += "HTTP/" + httpRes.ProtocolVersion + " " + httpRes.StatusCode.GetHashCode() + " " +
+                        httpRes.StatusDescription + "\r\n";
+            // Date
+            head += ToHeaderProperty("Date", httpRes.Headers["Date"]);
+            // Server
+            head += ToHeaderProperty("Server", httpRes.Server);
+            // Content-Type
+            head += ToHeaderProperty("Content-Type", httpRes.ContentType);
+            // Content-Length
+            head += ToHeaderProperty("Content-Length", httpRes.ContentLength.ToString());
+            if (cbLogRespHeaders.Checked)
+                LogHeaders(head);
+            return head;
         }
 
         private void LogHeaders(string head)
@@ -216,19 +254,15 @@ namespace HTTPProxyServerTcpListener
                 PrintMessage(line);
         }
 
-        private CacheItem CreateCache(HttpWebRequest req)
+        private void AddToCache(HttpWebResponse httpRes, string head, string content)
         {
-            var resp = req?.GetResponse() as HttpWebResponse;
-            if (resp == null) return null;
-
-            var body = "";
-            var stream = resp.GetResponseStream();
-            if (stream == null) return null;
-            using (var reader = new StreamReader(stream))
-            {
-                body = reader.ReadToEnd();
-            }
-            return new CacheItem(resp, body);
+            var x = httpRes.GetLifetimeService();
+            //var maxAge = int.Parse(txtCache.Text);
+            //var type = httpRes.ContentType;
+            //var date = DateTime.Now;
+            //var item = new CacheItem(maxAge, type, date, head, content);
+            //var eTag = httpRes.Headers["ETag"];
+            //_cache.TryAdd(eTag, item);
         }
 
         private void btnClear_Click(object sender, EventArgs e)

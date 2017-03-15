@@ -20,13 +20,14 @@ namespace HTTPProxyServerTcpListener
         public string Accept { get; set; }
         public string AcceptLanguage { get; set; }
         public string AcceptEncoding { get; set; }
+        public string CacheControl { get; set; }
         public string Con { get; set; }
         public string Body { get; set; }
+        public string ETag { get; set; }
 
         public static List<string> RequestToList(string text)
         {
-            string[] seperators = {"\r\n"};
-            return text.Split(seperators, StringSplitOptions.None).ToList();
+            return text.Split(new [] { Environment.NewLine }, StringSplitOptions.None).ToList();
         }
 
         private void MapToRequest(string context)
@@ -57,11 +58,17 @@ namespace HTTPProxyServerTcpListener
                     case "Accept-Encoding":
                         AcceptEncoding = property.Value;
                         break;
+                    case "Cache-Control":
+                        CacheControl = property.Value;
+                        break;
                     case "Connection":
                         Con = property.Value;
                         break;
                     case "Body":
                         Body = property.Value;
+                        break;
+                    case "ETag":
+                        ETag = property.Value;
                         break;
                     default:
                         break;
