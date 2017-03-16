@@ -133,7 +133,7 @@ namespace HTTPProxyServerTcpListener
 
         private string GetResponse(HttpWebResponse httpRes, NetworkStream stream)
         {
-            object responseBody;
+            byte[] responseBody;
             var head = GetHead(httpRes);
             var resStream = httpRes.GetResponseStream();
             if (resStream == null) return null;
@@ -141,24 +141,12 @@ namespace HTTPProxyServerTcpListener
             {
                 head = null;
                 var reader = new BinaryReader(resStream);
-//                var buffer = new byte[int.Parse(txtBufferSize.Text)];
-//                var totalBytes = 0;
-//                var bytes = reader.Read(buffer, 0, buffer.Length);
-//                List<byte> image = new List<byte>(buffer);
-//                while (bytes > 0)
-//                {
-//                    totalBytes += bytes;
-//                    image.AddRange(buffer);
-//                    bytes = reader.Read(buffer, 0, buffer.Length);
-//                }
-                var image = reader.ReadBytes((int) httpRes.ContentLength);
-                stream.Write(image, 0, (int)httpRes.ContentLength);
-                return null;
+                responseBody = reader.ReadBytes((int) httpRes.ContentLength);
             }
             else
             {
                 var reader = new StreamReader(resStream);
-                responseBody = reader.ReadToEnd();
+                responseBody = Encoding.UTF8.GetBytes(reader.ReadToEnd());
             }
             AddToCache(httpRes, head, responseBody);
             return MapToResponse(head, responseBody);
@@ -274,7 +262,7 @@ namespace HTTPProxyServerTcpListener
                 PrintMessage(line);
         }
 
-        private void AddToCache(HttpWebResponse httpRes, string head, object content)
+        private void AddToCache(HttpWebResponse httpRes, string head, byte[] content)
         {
             var maxAge = int.Parse(txtCache.Text);
             var type = httpRes.ContentType;
