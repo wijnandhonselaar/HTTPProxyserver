@@ -61,15 +61,18 @@ namespace HTTPProxyServerTcpListener
             _server.Start();
             PrintMessage("Listener has been started");
             while (_listening)
-                try
-                {
-                    var client = await _server.AcceptTcpClientAsync();
-                    Task.Run(() => ProcessRequest(client));
-                }
-                catch (ObjectDisposedException e)
-                {
-                    PrintMessage("Listener has been stopped successfully");
-                }
+            {
+                var client = await _server.AcceptTcpClientAsync();
+                Task.Run(() => ProcessRequest(client));
+            }
+//                try
+//                {
+
+//                }
+//                catch (ObjectDisposedException e)
+//                {
+//                    PrintMessage("Listener has been stopped successfully");
+//                }
         }
 
         private async Task ProcessRequest(TcpClient client)
@@ -92,9 +95,8 @@ namespace HTTPProxyServerTcpListener
                 {
                     if (cbLogReqHeaders.Checked) LogHeaders(context);
                     var request = ToHead(context);
-                    HttpWebResponse webResponse = null;
-                    var response = "";
-                    if (!IsCached(request, out response))
+                    byte[] response = {};
+                    if ((!request.ContainsKey("Cache-Control") || request["Cache-Control"] != "no-cache") && !IsCached(request, out response))
                     {
                         if (cbContentFilter.Checked && IsImage(request["Url"]))
                             request["Url"] = "http://reactiongifs.me/wp-content/uploads/2013/08/office-dwight-mad.gif";
@@ -102,12 +104,12 @@ namespace HTTPProxyServerTcpListener
                         if (webRequest == null)
                             return;
                         //                        AddHeaders(webRequest, request);
-                        webResponse = await webRequest.GetResponseAsync() as HttpWebResponse;
+                        var webResponse = await webRequest.GetResponseAsync() as HttpWebResponse;
                         if (webResponse == null)
                             return;
                         if (!HackRequest(webResponse, stream))
                         {
-                            response = GetResponse(webResponse, stream);
+                            response = GetResponse(webResponse);
                         }
                     }
                     if(response != null) SendResponse(response, stream);
@@ -119,19 +121,19 @@ namespace HTTPProxyServerTcpListener
 
         private bool AcceptRequest(string contentType)
         {
-            var invalid = new List<string> { "image", "video", "audio" };
+            var invalid = new List<string> { "video", "audio" };
             return invalid.All(x => !contentType.Contains(x));
         }
 
         private bool HackRequest(HttpWebResponse webResponse, NetworkStream stream)
         {
-            if (webResponse.Method == "GET") return false;
+            if (AcceptRequest(webResponse.ContentType)) return false;
             var responseStream = webResponse.GetResponseStream();
             responseStream?.CopyTo(stream);
             return true;
         }
 
-        private string GetResponse(HttpWebResponse httpRes, NetworkStream stream)
+        private byte[] GetResponse(HttpWebResponse httpRes)
         {
             byte[] responseBody;
             var head = GetHead(httpRes);
@@ -139,9 +141,10 @@ namespace HTTPProxyServerTcpListener
             if (resStream == null) return null;
             if (new[] {"image", "video"}.Any(c => httpRes.ContentType.Contains(c)))
             {
-                head = null;
-                var reader = new BinaryReader(resStream);
-                responseBody = reader.ReadBytes((int) httpRes.ContentLength);
+                using (var reader = new BinaryReader(resStream))
+                {
+                    responseBody = reader.ReadBytes((int) httpRes.ContentLength);
+                }
             }
             else
             {
@@ -152,23 +155,27 @@ namespace HTTPProxyServerTcpListener
             return MapToResponse(head, responseBody);
         }
 
-        private void SendResponse(string response, Stream stream)
+        private void SendResponse(byte[] response, Stream stream)
         {
-            var buffer = Encoding.UTF8.GetBytes(response);
-            stream.Write(buffer, 0, buffer.Length);
+            stream.Write(response, 0, response.Length);
         }
 
-        private bool IsCached(Dictionary<string, string> request, out string response)
+        private bool IsCached(Dictionary<string, string> request, out byte[] response)
         {
-            response = "";
+            response = new byte[1];
             if (!_cache.ContainsKey(request["Url"])) return false;
             CacheItem cached;
             _cache.TryGetValue(request["Url"], out cached);
             if ((DateTime.Now - cached.Date).TotalSeconds > cached.MaxAge) return false;
-            response = cached.Head + cached.Body;
+            if (cached.Head.Contains("image"))
+            {
+                response = cached.Body;
+                return true;
+            }
+            var x = Encoding.UTF8.GetBytes(cached.Head).ToList();
+            x.AddRange(cached.Body);
+            response = x.ToArray();
             PrintMessage("Got: " + request["Url"] + " from cache.");
-            PrintMessage(response);
-            
             return true;
         }
 
@@ -216,24 +223,17 @@ namespace HTTPProxyServerTcpListener
             return false;
         }
 
-        private void AddHeaders(HttpWebRequest webRequest, Dictionary<string, string> request)
-        {
-            webRequest.Accept = request["Accept"];
-//            webRequest.Connection = request.Con;
-            webRequest.UserAgent = request["User-Agent"];
-        }
-
         private string ToHeaderProperty(string name, string value)
         {
             return name + ": " + value + "\r\n";
         }
 
-        private string MapToResponse(string head, object body)
+        private byte[] MapToResponse(string head, byte[] body)
         {
-            var response = head;
-            response += "\r\n";
-            response += body;
-            return response;
+            var response = new List<byte>(Encoding.UTF8.GetBytes(head));
+            response.AddRange(Encoding.UTF8.GetBytes("\r\n"));
+            response.AddRange(body);
+            return response.ToArray();
         }
 
         private string GetHead(HttpWebResponse httpRes)
@@ -269,6 +269,12 @@ namespace HTTPProxyServerTcpListener
             var date = DateTime.Now;
             var item = new CacheItem(maxAge, type, date, head, content);
             _cache.AddOrUpdate(httpRes.ResponseUri.AbsoluteUri, item, (key, oldValue) => item);
+        }
+
+        private void AddHeaders(HttpWebRequest webRequest, Dictionary<string, string> request)
+        {
+            webRequest.Accept = request["Accept"];
+            webRequest.UserAgent = request["User-Agent"];
         }
 
         private void btnClear_Click(object sender, EventArgs e)
