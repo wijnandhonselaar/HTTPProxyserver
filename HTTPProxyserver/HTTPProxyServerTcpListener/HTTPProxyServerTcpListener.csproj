@@ -47,6 +47,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CacheItem.cs" />
+    <Compile Include="CacheService.cs" />
+    <Compile Include="CommuncationService.cs" />
+    <Compile Include="HelperService.cs" />
+    <Compile Include="MapperService.cs" />
     <Compile Include="ProxyUI.cs">
       <SubType>Form</SubType>
     </Compile>
