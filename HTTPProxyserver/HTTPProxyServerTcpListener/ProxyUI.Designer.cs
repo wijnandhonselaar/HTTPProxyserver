@@ -147,6 +147,8 @@
             // cbLogRespHeaders
             // 
             this.cbLogRespHeaders.AutoSize = true;
+            this.cbLogRespHeaders.Checked = true;
+            this.cbLogRespHeaders.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbLogRespHeaders.Location = new System.Drawing.Point(229, 215);
             this.cbLogRespHeaders.Name = "cbLogRespHeaders";
             this.cbLogRespHeaders.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -158,6 +160,8 @@
             // cbLogReqHeaders
             // 
             this.cbLogReqHeaders.AutoSize = true;
+            this.cbLogReqHeaders.Checked = true;
+            this.cbLogReqHeaders.CheckState = System.Windows.Forms.CheckState.Checked;
             this.cbLogReqHeaders.Location = new System.Drawing.Point(237, 192);
             this.cbLogReqHeaders.Name = "cbLogReqHeaders";
             this.cbLogReqHeaders.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -264,6 +268,7 @@
             // lstLog
             // 
             this.lstLog.FormattingEnabled = true;
+            this.lstLog.HorizontalScrollbar = true;
             this.lstLog.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.lstLog.Location = new System.Drawing.Point(12, 12);
             this.lstLog.Name = "lstLog";

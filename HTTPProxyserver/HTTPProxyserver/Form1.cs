@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +18,10 @@ namespace HTTPProxyserver
 {
     public partial class Form1 : Form
     {
-        private HttpListener _server;
+        private TcpListener _server;
+
+
+        private int _bufferSize = 2048;
 
         private delegate void MessageHandler(string message);
         private bool _listening;
@@ -47,99 +51,55 @@ namespace HTTPProxyserver
 
         private async void Listener()
         {
-//            _server = new HttpListener();
-//            var prefixes = GetPrefixes();
-//            foreach (var p in prefixes)
-//                _server.Prefixes.Add(p);
-//            _server.Start();
-//
-//            while (true)
-//                try
-//                {
-//                    var ctx = await _server.GetContextAsync();
-//                    Task.Run(() => ProcessRequest(ctx));
-//                }
-//                catch (HttpListenerException e)
-//                {
-//                    Console.WriteLine(e);
-//                }
-//        }
-//
-//        private IEnumerable<string> GetPrefixes()
-//        {
-//            var prefixes = new List<string>
-//                        {
-//                            "http://*:" + txtPort.Text + "/"
-//                        };
-//            return prefixes;
-//        }
-//
-//        private void ProcessRequest(HttpListenerContext ctx)
-//        {
-//            var methodName = ctx.Request.Url.Segments.Length > 1
-//                ? ctx.Request.Url.Segments[1].Replace("/", "")
-//                : "get";
-//            var strParams = ctx.Request.Url
-//                .Segments
-//                .Skip(2)
-//                .Select(s => s.Replace("/", ""))
-//                .ToList();
-//
-//            Console.Write(ctx.Request.Headers);
-//
-//            HttpWebRequest request = WebRequest.Create(ctx.Request.Url) as HttpWebRequest;
-//            if (request == null) return;
-//            request.Accept = ctx.Request.Headers.Get("Accept");
-//            //            request.Connection = ctx.Request.Headers.Get("Connection");
-//            request.ContentType = ctx.Request.ContentType;
-//            request.ContentLength = ctx.Request.ContentLength64;
-//            request.Host = ctx.Request.UserHostAddress;
-//
-//            HttpWebResponse response;
-//            try
-//            {
-//                response = (HttpWebResponse)request.GetResponse();
-//                PrintText("Host: " + response.Server);
-//                PrintText("Status: " + response.StatusCode);
-//            }
-//            catch (Exception e)
-//            {
-//                Console.WriteLine(e.Message);
-                _listening = true;
-            _server = new HttpListener();
-            _server.Prefixes.Add("http://*:" + txtPort.Text + "/");
+            _listening = true;
+            var port = int.Parse(txtPort.Text);
+            _server = new TcpListener(IPAddress.Any, port);
             _server.Start();
-
-            PrintText("Listening for requests!");
+            PrintMessage("Listener has been started");
             while (_listening)
-            {
                 try
                 {
-                    var context = await _server.GetContextAsync();
-                    Task.Run(() => ProcessRequest(context));
+                    var client = await _server.AcceptTcpClientAsync();
+                    Task.Run(() => ProcessRequest(client));
                 }
-                catch (HttpListenerException e)
+                catch (ObjectDisposedException e)
                 {
-                    PrintText("Listener has been stopped successfully");
+                    PrintMessage("Listener has been stopped successfully");
+                }
+        }
+
+        private async void ProcessRequest(TcpClient client)
+        {
+
+            var browserStream = client.GetStream();
+            
+            var buffer = new byte[_bufferSize];
+            while (true)
+            {
+                var bufferLength = await browserStream.ReadAsync(buffer, 0, buffer.Length);
+                var request = ToHead(Encoding.ASCII.GetString(buffer, 0, bufferLength));
+                using (var host = new TcpClient(request["Host"], 80))
+                {
+                    var outsideStream = host.GetStream();
+                    Console.WriteLine(Encoding.ASCII.GetString(buffer, 0, bufferLength));
+                    outsideStream.Write(buffer, 0, bufferLength);
+                    Array.Clear(buffer, 0, bufferLength);
+                    buffer = new byte[_bufferSize];
+                    bufferLength = await outsideStream.ReadAsync(buffer, 0, buffer.Length);
+                    Console.WriteLine(Encoding.ASCII.GetString(buffer, 0, bufferLength));
+                    browserStream.Write(buffer, 0, bufferLength);
                 }
             }
+            browserStream.Close();
+            client.Close();
 
         }
 
-        private void ProcessRequest(HttpListenerContext context)
-        {
-            var buffer = new byte[2048];
-            PrintText("Message!");
-            
-            context.Response.OutputStream.Write(buffer, 0, buffer.Length);
-            
-        }
-
-        private void PrintText(string text)
+        private void PrintMessage(string text)
         {
             if (lstLog.InvokeRequired)
             {
-                var d = new MessageHandler(PrintText);
+                var d = new MessageHandler(PrintMessage);
                 Invoke(d, text);
             }
             else
@@ -148,6 +108,44 @@ namespace HTTPProxyserver
             }
         }
 
-//        private delegate void NewMessage(string message);
+        private Dictionary<string, string> ToHead(string context)
+        {
+            var request = new Dictionary<string, string>();
+            var lines = RequestToList(context);
+            for (var i = 0; i < lines.Count; i++)
+            {
+                if (i > 0)
+                {
+                    if (lines[i].Contains(':'))
+                    {
+                        request.Add(lines[i].Split(':')[0], lines[i].Split(':')[1].Trim());
+                    }
+                    else if (lines[i] == "\r\n")
+                    {
+                        var body = "";
+                        for (var y = i + 1; y < lines.Count; y++)
+                        {
+                            body += lines[y];
+                        }
+                        request.Add("Body", body);
+                        i = lines.Count;
+                    }
+                }
+                else
+                {
+                    var statusLine = lines[i].Split(' ');
+                    request.Add("Method", statusLine[0]);
+                    request.Add("Url", statusLine[1]);
+                    request.Add("HttpVersion", statusLine[2]);
+                }
+            }
+            return request;
+        }
+
+        public static List<string> RequestToList(string text)
+        {
+            return text.Split(new[] { Environment.NewLine }, StringSplitOptions.None).ToList();
+        }
+
     }
 }

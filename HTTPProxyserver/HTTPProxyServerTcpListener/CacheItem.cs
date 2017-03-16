@@ -10,7 +10,7 @@ namespace HTTPProxyServerTcpListener
         {
         }
 
-        public CacheItem(int maxAge, string type, DateTime date, string head, string body)
+        public CacheItem(int maxAge, string type, DateTime date, string head, object body)
         {
             MaxAge = maxAge;
             Type = type;
@@ -23,6 +23,6 @@ namespace HTTPProxyServerTcpListener
         public DateTime Date { get; set; }
         public string Type { get; set; }
         public string Head { get; set; }
-        public string Body { get; set; }
+        public object Body { get; set; }
     }
 }
