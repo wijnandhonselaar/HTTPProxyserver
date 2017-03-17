@@ -65,7 +65,7 @@ HttpProxyServer met caching en headermanipulatie
 
 ##  Zorg voor een voorbeeld van een http-request en van een http-response. 
 (Kan je globale overeenkomsten vinden tussen een request en een response?)  (Teken een diagram en licht de onderdelen toe)
-
+![alt tag](https://raw.githubusercontent.com/wijnandhonselaar/HTTPProxyserver/develop/request.png)
 
 ##  TCP/IP
 ###  Beschrijving van concept in eigen woorden
