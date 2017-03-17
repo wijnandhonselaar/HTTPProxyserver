@@ -14,8 +14,9 @@ namespace HTTPProxyServerTcpListener
         public void AddToCache(HttpWebResponse httpRes, string head, byte[] content, int maxAge)
         {
             var type = httpRes.ContentType;
-            var date = DateTime.Now;
-            var item = new CacheItem(maxAge, type, date, head, content);
+            var expires = Convert.ToDateTime(httpRes.Headers["Expires"]);
+            var date = Convert.ToDateTime(httpRes.Headers["Date"]);
+            var item = new CacheItem(maxAge, type, date, expires, head, content);
             _cache.AddOrUpdate(httpRes.ResponseUri.AbsoluteUri, item, (key, oldValue) => item);
         }
 
@@ -25,7 +26,7 @@ namespace HTTPProxyServerTcpListener
             if (!_cache.ContainsKey(request["Url"])) return false;
             CacheItem cached;
             _cache.TryGetValue(request["Url"], out cached);
-            if ((DateTime.Now - cached.Date).TotalSeconds > cached.MaxAge) return false;
+            if ((DateTime.Now - cached.Date).TotalSeconds > cached.MaxAge || cached.Expires < DateTime.Now) return false;
             if (cached.Head.Contains("image"))
             {
                 response = cached.Body;
@@ -37,7 +38,7 @@ namespace HTTPProxyServerTcpListener
             response = x.ToArray();
             return true;
         }
-
+        
         public void ClearCache()
         {
             _cache.Clear();

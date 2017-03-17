@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -28,8 +29,16 @@ namespace HTTPProxyServerTcpListener
         public bool HackRequest(HttpWebResponse webResponse, NetworkStream stream)
         {
             if (AcceptRequest(webResponse.ContentType)) return false;
-            var responseStream = webResponse.GetResponseStream();
-            responseStream?.CopyTo(stream);
+            try
+            {
+                var responseStream = webResponse.GetResponseStream();
+                responseStream?.CopyTo(stream);
+            }
+            catch (ProtocolViolationException e)
+            {
+                Console.WriteLine("Whatup?");
+                Console.WriteLine(e.Message);
+            }
             return true;
         }
 

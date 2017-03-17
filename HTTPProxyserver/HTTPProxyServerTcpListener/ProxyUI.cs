@@ -18,6 +18,7 @@ namespace HTTPProxyServerTcpListener
         private MapperService _ms = new MapperService();
         private HelperService _hs = new HelperService();
         private CommuncationService _comService = new CommuncationService();
+        private int _requestNumber = 0;
 
         public ProxyUi()
         {
@@ -76,6 +77,7 @@ namespace HTTPProxyServerTcpListener
                     // By using a ... expression, the parameter doesn't have to be of type Object
                     // Process every request to be able to handle multiple at once
                     Task.Run(() => ProcessRequest(client));
+                    _requestNumber++;
                 }
                 catch (ObjectDisposedException e)
                 {
@@ -93,38 +95,51 @@ namespace HTTPProxyServerTcpListener
         /// <returns></returns>
         private async Task ProcessRequest(TcpClient client)
         {
-            using (var stream = client.GetStream())
+            try
             {
-                if (client.Connected && stream.DataAvailable)
+                using (var stream = client.GetStream())
                 {
-                    int bufferSize;
-                    if (!int.TryParse(txtBufferSize.Text, out bufferSize))
-                        bufferSize = 2048;
-
-                    var buffer = new byte[bufferSize];
-                    await stream.ReadAsync(buffer, 0, bufferSize);
-                    var context = Encoding.UTF8.GetString(buffer);
-
-                    // Log request headers if enabled
-                    if (cbLogReqHeaders.Checked) LogHeaders(context);
-
-                    var request = _ms.ToHead(context);
-                    byte[] response = { };
-                    if (cbChangedContent.Checked || (!request.ContainsKey("Cache-Control") || request["Cache-Control"] != "no-cache" || request["Cache-Control"] != "max-age=0")
-                        && !_cs.IsCached(request, out response))
+                    if (client.Connected && stream.DataAvailable)
                     {
-                        if (cbContentFilter.Checked && _hs.IsImage(request["Url"]))
-                            request["Url"] = "http://reactiongifs.me/wp-content/uploads/2013/08/office-dwight-mad.gif";
+                        int bufferSize;
+                        if (!int.TryParse(txtBufferSize.Text, out bufferSize))
+                            bufferSize = 2048;
 
-                        response = await GetWebResponse(request, stream);
+                        var buffer = new byte[bufferSize];
+                        await stream.ReadAsync(buffer, 0, bufferSize);
+                        var context = Encoding.UTF8.GetString(buffer);
+
+                        // Log request headers if enabled
+                        if (cbLogReqHeaders.Checked) LogHeaders(context);
+
+                        var request = _ms.ToHead(context);
+
+                        // Log Client if enabled
+                        if (cbLogClient.Checked) PrintMessage(request["User-Agent"]);
+
+                        byte[] response = { };
+                        if (cbChangedContent.Checked || (!request.ContainsKey("Cache-Control") || request["Cache-Control"] != "no-cache" || request["Cache-Control"] != "max-age=0")
+                            && !_cs.IsCached(request, out response))
+                        {
+                            if (cbContentFilter.Checked && _hs.IsImage(request["Url"]))
+                                request["Url"] = "http://reactiongifs.me/wp-content/uploads/2013/08/office-dwight-mad.gif";
+
+                            response = await GetWebResponse(request, stream);
+                        }
+                        else
+                        {
+                            PrintMessage("Got: " + request["Url"] + " from cache.");
+                        }
+                        if (response != null) _comService.SendResponse(response, stream);
                     }
-                    else
-                    {
-                        PrintMessage("Got: " + request["Url"] + " from cache.");
-                    }
-                    if (response != null) _comService.SendResponse(response, stream);
                 }
             }
+            catch (ProtocolViolationException e)
+            {
+                Console.WriteLine(e);
+                Console.WriteLine(e.Message);
+            }
+            
             client.Close();
         }
         /// <summary>
@@ -143,21 +158,27 @@ namespace HTTPProxyServerTcpListener
             webRequest.Method = request["Method"];
             webRequest.Accept = request["Accept"];
             webRequest.UserAgent = request["User-Agent"];
+
+            // Log request content if enabled
+            if (cbLogContentOut.Checked)
+                PrintMessage(request.ContainsValue("Body") ? request["Body"] : "No content to log."); 
             
             // if POST, set headers about the content of the request
-            if (webRequest.Method == "POST")
+            if (webRequest.Method == "POST" || webRequest.Method == "PUT" || webRequest.Method == "DELETE")
             {
                 webRequest.ContentType = request["Content-Type"];
                 webRequest.ContentLength = int.Parse(request["Content-Length"]);
+                // https://msdn.microsoft.com/en-us/library/debx8sh9(v=vs.110).aspx
                 // if there is data, add the body to the request.
-                //if (request.ContainsKey("body"))
-                //{
-                //    using (var s = webRequest.GetRequestStream())
-                //    {
-                //        var b = Encoding.UTF8.GetBytes(request["body"]);
-                //        s.Write(b, 0, b.Length);
-                //    }
-                //}
+                if (request.ContainsKey("Body"))
+                {
+                    using (var s = webRequest.GetRequestStream())
+                    {
+                        var b = Encoding.UTF8.GetBytes(request["body"]);
+                        s.Write(b, 0, b.Length);
+                    }
+                    webRequest.ContentLength = request["body"].Length;
+                }
             }
 
             // Hide User data (UserAgent & Host and require login
@@ -170,7 +191,7 @@ namespace HTTPProxyServerTcpListener
             // Otherwise handle the response manually
             if (!_hs.HackRequest(webResponse, stream))
             {
-                response = GetResponse(webResponse);
+                response = await GetResponse(webResponse);
             }
             return response;
         }
@@ -180,13 +201,13 @@ namespace HTTPProxyServerTcpListener
         /// </summary>
         /// <param name="webResponse"></param>
         /// <returns>response</returns>
-        private byte[] GetResponse(HttpWebResponse webResponse)
+        private async Task<byte[]> GetResponse(HttpWebResponse webResponse)
         {
             var head = _ms.GetHead(webResponse);
 
             // Log Response headers if enabled
             if (cbLogRespHeaders.Checked) LogHeaders(head);
-            var responseBody = _comService.GetResponseBody(webResponse, head);
+            var responseBody = await Task.Run(() => _comService.GetResponseBody(webResponse, head));
 
             // Log content if enabled
             if(cbLogContentIn.Checked) PrintMessage(Encoding.UTF8.GetString(responseBody));

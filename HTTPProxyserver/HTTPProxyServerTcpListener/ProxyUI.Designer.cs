@@ -30,6 +30,7 @@
         {
             this.btnToggleProxy = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.btnClearCache = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -48,7 +49,6 @@
             this.txtPort = new System.Windows.Forms.TextBox();
             this.container1 = new System.Windows.Forms.GroupBox();
             this.lstLog = new System.Windows.Forms.ListBox();
-            this.btnClearCache = new System.Windows.Forms.Button();
             this.groupBox2.SuspendLayout();
             this.container1.SuspendLayout();
             this.SuspendLayout();
@@ -74,6 +74,16 @@
             this.groupBox2.TabIndex = 22;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Controls";
+            // 
+            // btnClearCache
+            // 
+            this.btnClearCache.Location = new System.Drawing.Point(193, 19);
+            this.btnClearCache.Name = "btnClearCache";
+            this.btnClearCache.Size = new System.Drawing.Size(185, 57);
+            this.btnClearCache.TabIndex = 19;
+            this.btnClearCache.Text = "Clear cache";
+            this.btnClearCache.UseVisualStyleBackColor = true;
+            this.btnClearCache.Click += new System.EventHandler(this.btnClearCache_Click);
             // 
             // btnClear
             // 
@@ -127,6 +137,7 @@
             // cbLogContentOut
             // 
             this.cbLogContentOut.AutoSize = true;
+            this.cbLogContentOut.Enabled = false;
             this.cbLogContentOut.Location = new System.Drawing.Point(251, 261);
             this.cbLogContentOut.Name = "cbLogContentOut";
             this.cbLogContentOut.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -138,6 +149,7 @@
             // cbLogContentIn
             // 
             this.cbLogContentIn.AutoSize = true;
+            this.cbLogContentIn.Enabled = false;
             this.cbLogContentIn.Location = new System.Drawing.Point(260, 238);
             this.cbLogContentIn.Name = "cbLogContentIn";
             this.cbLogContentIn.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
@@ -278,17 +290,7 @@
             this.lstLog.Size = new System.Drawing.Size(402, 472);
             this.lstLog.TabIndex = 20;
             // 
-            // btnClearCache
-            // 
-            this.btnClearCache.Location = new System.Drawing.Point(193, 19);
-            this.btnClearCache.Name = "btnClearCache";
-            this.btnClearCache.Size = new System.Drawing.Size(185, 57);
-            this.btnClearCache.TabIndex = 19;
-            this.btnClearCache.Text = "Clear cache";
-            this.btnClearCache.UseVisualStyleBackColor = true;
-            this.btnClearCache.Click += new System.EventHandler(this.btnClearCache_Click);
-            // 
-            // ProxyUI
+            // ProxyUi
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
