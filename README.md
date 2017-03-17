@@ -57,18 +57,59 @@ De content van een httpbericht wordt verpakt in packages, opgebouwd uit bytes.
 ###  Wat kan er beter? Geef aan waarom?
 Ik heb heel de codebase geschreven om te voldoen aan de requirements van de opdracht. Tijdens het uitvoeren van de opdracht had ik meerdere opdrachten tegelijk, zoals het Project, voorbereiding van presentaties & daarmee heb ik tijdens de twee weken van deze opdracht zeker 50+ uur per week gevuld. Ik heb het gros van de requirements voldaan en daar is mijn code dan ook op toegespitst.
 
-Zoals het utivoeren van caching. In de opdracht staat beschreven dat er caching moet zijn en je zelf de timeout in moet kunnen stellen. Op het moment dat een bericht binnenkomt en deze gecached wordt, wordt een datetime aangemaakt en als property bij het gecachde object geplaatst. Deze wordt vervolgs gebruikt om te bepalen of het pakket opnieuw moet worden opgehaald of niet. Het volgt niet de standaarden, maar dit is de simpelste manier om te voldoen aan de requiremt van de opdracht.
+Redirect werkt bijvoorbeeld niet. Waneer je naar Nu.nl gaat en de cookies accepteerd, wordt de post verzonden en zou je redirected moeten worden naar nu.nl. Echter gebeurt deze laatste stap niet.
 ###  Wat zou je een volgende keer anders doen?
 Eerder naar medestudenten stappen en meer samenwerken. Ik ben alles behalve trots op de geleverde kwaliteit en door eerder met andere studenten samen te werken zou de code kwaliteit (dus meer de standaarden gevolgd bijvoorbeeld) een stuk beter zijn.
 ###  Hoe zou de opdracht anders moeten zijn om er meer van te leren?
+Iets leukers dan het zelf schrijven van een proxy in C# met depricated code waardoor je van huidige programming standards af moet wijken. 
 
 # Kritische reflectie op eigen beroepsproduct
 
 ### Definieer kwaliteit in je architectuur, design, implementatie. 
+Zoals hiervoor beschreven, ben ik niet trots op de geleverde kwaliteit. Ik ben om standaarden heen gegaan en niet aan 100% van de requirements voldaan.
 
+Wel heb ik ervoor gekozen om voor stream using te gebruiken. Hierdoor hoef je je geen zorgen te maken over het sluiten van de stream als je klaar bent.
+
+Gebruik van Tasks tegenover los thread beheer. Gebruik van Task is op dit moment de standaard binnen C#. Thread management is iets wat Microsoft zelf geprobeerd heeft goed op te lossen en wat na meerdere pogingen uit is gekomen op Task. Het wordt ZWAAR afgeraden om zelf met Threads te werken en de management van Threads in eigen handen te nemen. Tasks maken gebruik van een individuele thread of threadpool, afhankelijk van wat er in de task gebeurt. Dit hele proces wordt uit handen genomen door het gebruik van Task tegenover Thread.
+
+Wel heb ik code gescheiden in een aantal services om zo het overzicht nog enigzins te bewaren.
 ### Geef voorbeelden.
+```C#
+// Using & stream
+using (var resStream = webResponse.GetResponseStream())
+{
+    if (resStream == null) return null;
+    // if ContentType is image, use BinaryReader
+    // 
+    if (webResponse.ContentType.Contains("image"))
+    {
+        using (var reader = new BinaryReader(resStream))
+            responseBody = reader.ReadBytes((int)webResponse.ContentLength);
+    }
+    else
+    {
+        using (var reader = new StreamReader(resStream))
+            responseBody = Encoding.UTF8.GetBytes(reader.ReadToEnd());
+    }
+}
+
+// Task in combinatie met await.
+private async Task<byte[]> GetResponse(HttpWebResponse webResponse)
+{
+  var responseBody = await Task.Run(() => _comService.GetResponseBody(webResponse, head));
+  return responseBody;
+}
+```
 ### Wat kan er beter, waarom? 
+Meerdere punten: 
+Door het hele systeem te bouwen op basis van dezelfde classes. Dus alles met TCP, WebRequest of HttpListener. Dit voorkomt een hoop gesjoemel met data-types.
 
+Gebruik maken van een design pattern. Ik heb functies geschreven die meerdere dingen uitvoeren. Des te meer dit voorkomt, des te lastiger het wordt om een goed leesbare codebase te houden.
 
+Gebruik maken van enums om te kijken naar bijvoorbeeld Method van een request.
+
+Door het omzetten van een request naar een Dictionary worden alle values opgehaald op basis van keys. Deze keys zouden kunnen worden omgezet naar een propertiy van een object. Zo voorkom je dat code kan crashen door het maken van een typfout. 
+
+Daarnaast voer ik niet overal null-checks uit op waardes uit de Dictionary. Waardes als User-Agent en Accept zijn altijd aanwezig in een request. Echter moet je hier in de code niet vanuit gaan en ook hier een passende methode gebruiken. Door bijvoorbeeld met TryGetValue te gebruiken in plaats van yourDictionary["key"].
 
 <<<<<
