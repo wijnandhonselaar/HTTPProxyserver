@@ -21,7 +21,7 @@ HTTP-request
 Body
 
   ...
-  
+  
 HTTP-response
  - Status Line: http version & response code (200, 500 etc)
  - general-header: 
@@ -29,8 +29,8 @@ HTTP-response
   - Content-Length: nnnn
   - Accept-Language: xx-xx
  - entity-header
-   - Metainformation about body contents
-   
+   - Metainformation about body contents
+   
 Body
 
  ...
@@ -46,7 +46,11 @@ Body
  
 
 2.b Hoe wordt de content in een bericht verpakt?
-  De content van een HTTP bericht begint na een witregel na de entity-header.
+  De content van een HTTP bericht begint na een witregel na de entity-header:
+  Head
   
+  Body
+  
+3
   
   
