@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="HTTPProxyServerTcpListener.CacheItem">
+    <Position X="11.25" Y="0.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAIAAAAABAQAAAAAAAAABIQAAAAAAAAA=</HashCode>
+      <FileName>CacheItem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HTTPProxyServerTcpListener.CacheService">
+    <Position X="7" Y="0.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAgKAAAAAA=</HashCode>
+      <FileName>CacheService.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HTTPProxyServerTcpListener.CommuncationService">
+    <Position X="4.25" Y="3.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>CommuncationService.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HTTPProxyServerTcpListener.HelperService">
+    <Position X="4.25" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAAIAAAAAAAAAAAAAAAAIAAAAAAAAAAAAA=</HashCode>
+      <FileName>HelperService.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HTTPProxyServerTcpListener.MapperService">
+    <Position X="7" Y="3.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAhAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAIAgAAA=</HashCode>
+      <FileName>MapperService.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HTTPProxyServerTcpListener.ProxyUi">
+    <Position X="0.75" Y="0.5" Width="2.75" />
+    <NestedTypes>
+      <Delegate Name="HTTPProxyServerTcpListener.ProxyUi.MessageHandler" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>ProxyUi.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>EEAgcAACACAAABAQQDCAAAAOAAEEZAGCIKEBCgBJAAA=</HashCode>
+      <FileName>ProxyUi.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
