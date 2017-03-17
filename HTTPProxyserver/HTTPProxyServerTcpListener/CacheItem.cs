@@ -6,10 +6,14 @@ namespace HTTPProxyServerTcpListener
 {
     public class CacheItem
     {
-        public CacheItem()
-        {
-        }
-
+        /// <summary>
+        /// Init CacheItem
+        /// </summary>
+        /// <param name="maxAge"></param>
+        /// <param name="type"></param>
+        /// <param name="date"></param>
+        /// <param name="head"></param>
+        /// <param name="body"></param>
         public CacheItem(int maxAge, string type, DateTime date, string head, byte[] body)
         {
             MaxAge = maxAge;
@@ -23,6 +27,6 @@ namespace HTTPProxyServerTcpListener
         public DateTime Date { get; set; }
         public string Type { get; set; }
         public string Head { get; set; }
-        public byte[] Body { get; set; }
+        public byte[] Body { get; set; } // Body is an byte[] to also accept images without having to convert it
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace HTTPProxyServerTcpListener
 {
-    partial class ProxyUI
+    partial class ProxyUi
     {
         /// <summary>
         /// Required designer variable.
@@ -48,13 +48,14 @@
             this.txtPort = new System.Windows.Forms.TextBox();
             this.container1 = new System.Windows.Forms.GroupBox();
             this.lstLog = new System.Windows.Forms.ListBox();
+            this.btnClearCache = new System.Windows.Forms.Button();
             this.groupBox2.SuspendLayout();
             this.container1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnToggleProxy
             // 
-            this.btnToggleProxy.Location = new System.Drawing.Point(6, 19);
+            this.btnToggleProxy.Location = new System.Drawing.Point(6, 93);
             this.btnToggleProxy.Name = "btnToggleProxy";
             this.btnToggleProxy.Size = new System.Drawing.Size(183, 57);
             this.btnToggleProxy.TabIndex = 17;
@@ -64,18 +65,19 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.btnClearCache);
             this.groupBox2.Controls.Add(this.btnClear);
             this.groupBox2.Controls.Add(this.btnToggleProxy);
-            this.groupBox2.Location = new System.Drawing.Point(434, 393);
+            this.groupBox2.Location = new System.Drawing.Point(434, 325);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(386, 88);
+            this.groupBox2.Size = new System.Drawing.Size(386, 156);
             this.groupBox2.TabIndex = 22;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Controls";
             // 
             // btnClear
             // 
-            this.btnClear.Location = new System.Drawing.Point(195, 19);
+            this.btnClear.Location = new System.Drawing.Point(195, 93);
             this.btnClear.Name = "btnClear";
             this.btnClear.Size = new System.Drawing.Size(185, 57);
             this.btnClear.TabIndex = 18;
@@ -260,7 +262,7 @@
             this.container1.Controls.Add(this.txtPort);
             this.container1.Location = new System.Drawing.Point(434, 12);
             this.container1.Name = "container1";
-            this.container1.Size = new System.Drawing.Size(386, 374);
+            this.container1.Size = new System.Drawing.Size(386, 307);
             this.container1.TabIndex = 21;
             this.container1.TabStop = false;
             this.container1.Text = "Proxy Settings";
@@ -276,6 +278,16 @@
             this.lstLog.Size = new System.Drawing.Size(402, 472);
             this.lstLog.TabIndex = 20;
             // 
+            // btnClearCache
+            // 
+            this.btnClearCache.Location = new System.Drawing.Point(193, 19);
+            this.btnClearCache.Name = "btnClearCache";
+            this.btnClearCache.Size = new System.Drawing.Size(185, 57);
+            this.btnClearCache.TabIndex = 19;
+            this.btnClearCache.Text = "Clear cache";
+            this.btnClearCache.UseVisualStyleBackColor = true;
+            this.btnClearCache.Click += new System.EventHandler(this.btnClearCache_Click);
+            // 
             // ProxyUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -284,7 +296,7 @@
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.container1);
             this.Controls.Add(this.lstLog);
-            this.Name = "ProxyUI";
+            this.Name = "ProxyUi";
             this.Text = "Form1";
             this.groupBox2.ResumeLayout(false);
             this.container1.ResumeLayout(false);
@@ -315,6 +327,7 @@
         private System.Windows.Forms.TextBox txtPort;
         private System.Windows.Forms.GroupBox container1;
         private System.Windows.Forms.ListBox lstLog;
+        private System.Windows.Forms.Button btnClearCache;
     }
 }
 

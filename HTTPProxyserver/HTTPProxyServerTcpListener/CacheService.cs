@@ -37,5 +37,10 @@ namespace HTTPProxyServerTcpListener
             response = x.ToArray();
             return true;
         }
+
+        public void ClearCache()
+        {
+            _cache.Clear();
+        }
     }
 }
