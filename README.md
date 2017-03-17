@@ -8,7 +8,7 @@ Studentnummer:
 HttpProxyServer met caching en headermanipulatie
 
 ##  Ontwerp en bouw de *architectuur* van de applicatie die HTTP-requests van een willekeurige PC opvangt en doorstuurt naar één webserver. (Teken een diagram en licht de onderdelen toe)
-
+![alt-tag](https://github.com/wijnandhonselaar/HTTPProxyserver/blob/develop/ClassDiagram.png?raw=true)
 
 ##  Zorg voor een voorbeeld van een http-request en van een http-response. 
 (Kan je globale overeenkomsten vinden tussen een request en een response?)  (Teken een diagram en licht de onderdelen toe)
