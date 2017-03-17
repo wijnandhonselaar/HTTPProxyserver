@@ -143,7 +143,7 @@ namespace HTTPProxyServerTcpListener
             webRequest.Method = request["Method"];
             webRequest.Accept = request["Accept"];
             webRequest.UserAgent = request["User-Agent"];
-
+            
             // if POST, set headers about the content of the request
             if (webRequest.Method == "POST")
             {
